@@ -7,13 +7,14 @@
 #define PROJECT_WAVEFORMHEADER_H
 
 struct WaveformSample {
-    char timestamp[100];
-    char phase_A_voltage[100];
-    char phase_B_voltage[100];
-    char phase_C_voltage[100];
-    char line_current[100];
-    char frequency[100];
-    char power_factor[100];
-    char trd_percent[100];
+    char bufferVar[1000];
+    char timestamp[1000];
+    char phase_A_voltage[1000];
+    char phase_B_voltage[1000];
+    char phase_C_voltage[1000];
+    char line_current[1000];
+    char frequency[1000];
+    char power_factor[1000];
+    char trd_percent[1000];
 };
 #endif //PROJECT_WAVEFORMHEADER_H
