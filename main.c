@@ -3,7 +3,7 @@
 #include <string.h>
 #include "waveformHeader.h"
 
-int main(void){
+int main(){
     FILE *power_data = fopen("C:\\Users\\t2-rennolds\\OneDrive - UWE Bristol\\Attachments\\programing for eng\\tb2\\Project\\power_quality_log.csv","r");
     if (power_data == NULL) {
         printf("File is either empty or not found.\n");
@@ -11,10 +11,11 @@ int main(void){
     }else{
         printf("File found.\n");
         struct WaveformSample data1;
+        int *bufferVar = (int*)malloc(ftell(power_data));
         int i = 0;
-        while (fgets(data1.bufferVar,sizeof(data1.bufferVar),power_data)!=NULL) {
+        while (fgets((char *) bufferVar, sizeof(bufferVar), power_data) != NULL) {
             char *token;
-            token = strtok(data1.bufferVar,",");
+            token = strtok((char *) bufferVar, ",");
             data1.timestamp[i] = atof(token);
         }
         printf(data1.timestamp);
