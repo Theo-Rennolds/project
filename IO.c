@@ -10,7 +10,7 @@ int file_input(char* file_name){
         return 1;
     }else {
         printf("File found.\n");
-        WaveformSample *data1[malloc(WaveformSample * file_height)];
+        WaveformSample *data1[(intptr_t)malloc(file_height * sizeof(WaveformSample))];
         int i = 0;
         while (fgets(data1.bufferVar, sizeof(data1.bufferVar), power_data) != NULL) {
             i = i + 1;

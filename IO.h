@@ -4,7 +4,7 @@
 
 #ifndef PROJECT_IO_H
 #define PROJECT_IO_H
-#define int file_height=1000
+extern int file_height;
 typedef struct{
     double bufferVar;
     double timestamp;
