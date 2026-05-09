@@ -4,88 +4,83 @@
 #include <stdio.h>
 #include <math.h>
 #include "IO.h"
+#include "Waveform.h"
 
 double square_number(double num);
 
 void analysis(const WaveformSample *data, const int count){
-    FILE *output_file = fopen("FileOutput.txt","a");
-    if (data == NULL || count == 0){
-        printf("No data to analyze.\n");
+    remove("results.txt"); //Clears any file that was used previously for new results
+    FILE *output_file = fopen("results.txt","a"); //Creates and appends items to txt file
+    if (output_file == NULL) {
+        printf("Could not open or create FileOutput.txt\n");
         return;
     }
-    double sum_phase_A = 0.0;
-    double sum_phase_B = 0.0;
-    double sum_phase_C = 0.0;
-    double sum_phase_ARMS = 0.0;
-    double sum_phase_BRMS = 0.0;
-    double sum_phase_CRMS = 0.0;
-    double max_freq = 0.0;
-    double min_freq = 0.0;
-    double meanA = 0.0;
-    double meanB = 0.0;
-    double meanC = 0.0;
-    double RMSA = 0.0;
-    double RMSB = 0.0;
-    double RMSC = 0.0;
+    AnalysisResults result = {0};
     for (int i=0;i<count;i=i+1){
-        sum_phase_A = sum_phase_A+data[i].phase_A_voltage;
-        sum_phase_B = sum_phase_B+data[i].phase_B_voltage;
-        sum_phase_C = sum_phase_C+data[i].phase_C_voltage;
-        sum_phase_ARMS = sum_phase_ARMS+square_number(data[i].phase_A_voltage);
-        sum_phase_BRMS = sum_phase_BRMS+square_number(data[i].phase_B_voltage);
-        sum_phase_CRMS = sum_phase_CRMS+square_number(data[i].phase_C_voltage);
-        RMSA = sqrt(sum_phase_ARMS / count);
-        RMSB = sqrt(sum_phase_BRMS / count);
-        RMSC = sqrt(sum_phase_CRMS / count);
-        meanA = sum_phase_A/count;
-        meanB = sum_phase_B/count;
-        meanC = sum_phase_C/count;
+        result.sum_phase_A = result.sum_phase_A+data[i].phase_A_voltage;
+        result.sum_phase_B = result.sum_phase_B+data[i].phase_B_voltage;
+        result.sum_phase_C = result.sum_phase_C+data[i].phase_C_voltage; //The summation of A, B and C
+        result.sum_phase_ARMS = result.sum_phase_ARMS+square_number(data[i].phase_A_voltage);
+        result.sum_phase_BRMS = result.sum_phase_BRMS+square_number(data[i].phase_B_voltage);
+        result.sum_phase_CRMS = result.sum_phase_CRMS+square_number(data[i].phase_C_voltage); //The summation of the squares of A, B and C
         if (fabs(data[i].phase_A_voltage) >= 324.9){
-            fprintf(output_file,"sample number %d in Phase A has been flagged.\n",i+1);
+            fprintf(output_file,"sample number %d in Phase A has been flagged for clipping.\n",i+1);
         }
         if (fabs(data[i].phase_B_voltage) >= 324.9){
-            fprintf(output_file,"sample number %d in Phase B has been flagged.\n",i+1);
+            fprintf(output_file,"sample number %d in Phase B has been flagged for clipping.\n",i+1);
         }
         if (fabs(data[i].phase_C_voltage) >= 324.9){
-            fprintf(output_file,"sample number %d in Phase C has been flagged.\n",i+1);
+            fprintf(output_file,"sample number %d in Phase C has been flagged for clipping.\n",i+1); //Flags sample numbers
         }
-        if (data[i].phase_A_voltage >= max_freq) {
-            max_freq = data[i].phase_A_voltage;
+        if (data[i].phase_A_voltage >= result.max_freqA) {
+            result.max_freqA = data[i].phase_A_voltage;
         }
-        if (data[i].phase_B_voltage >= max_freq) {
-            max_freq = data[i].phase_B_voltage;
+        if (data[i].phase_B_voltage >= result.max_freqB) {
+            result.max_freqB = data[i].phase_B_voltage;
         }
-        if (data[i].phase_C_voltage >= max_freq) {
-            max_freq = data[i].phase_C_voltage;
+        if (data[i].phase_C_voltage >= result.max_freqC) {
+            result.max_freqC = data[i].phase_C_voltage;
         }
-        if (data[i].phase_A_voltage >= min_freq) {
-            min_freq = data[i].phase_A_voltage;
+        if (data[i].phase_A_voltage <= result.min_freqA) {
+            result.min_freqA = data[i].phase_A_voltage;
         }
-        if (data[i].phase_B_voltage >= min_freq) {
-            min_freq = data[i].phase_B_voltage;
+        if (data[i].phase_B_voltage <= result.min_freqB) {
+            result.min_freqB = data[i].phase_B_voltage;
         }
-        if (data[i].phase_C_voltage >= min_freq) {
-            min_freq = data[i].phase_C_voltage;
+        if (data[i].phase_C_voltage <= result.min_freqC) {
+            result.min_freqC = data[i].phase_C_voltage; //The logistics for Min/Max A, B and C
         }
     }
-    if (RMSA >= 230-(230/10)||RMSA >= 230+(230/10)) {
+    result.RMSA = sqrt(result.sum_phase_ARMS / count);
+    result.RMSB = sqrt(result.sum_phase_BRMS / count);
+    result.RMSC = sqrt(result.sum_phase_CRMS / count); //The RMS of A, B and C
+    result.meanA = result.sum_phase_A/count;
+    result.meanB = result.sum_phase_B/count;
+    result.meanC = result.sum_phase_C/count; //The Mean of A, B and C
+    if (result.RMSA >= 230-(230/10)||result.RMSA >= 230+(230/10)) {
         fprintf(output_file,"Phase A is within 10 percent of 230\n");
     }
-    if (RMSB >= 230-(230/10)||RMSB >= 230+(230/10)) {
+    if (result.RMSB >= 230-(230/10)||result.RMSB >= 230+(230/10)) {
         fprintf(output_file,"Phase B is within 10 percent of 230\n");
     }
-    if (RMSC >= 230-(230/10)||RMSC >= 230+(230/10)) {
-        fprintf(output_file,"Phase C is within 10 percent of 230\n");
+    if (result.RMSC >= 230-(230/10)||result.RMSC >= 230+(230/10)) {
+        fprintf(output_file,"Phase C is within 10 percent of 230\n"); //The clipping detection
     }
-    fprintf(output_file,"RMS Phase A Voltage : %.8f V\n", RMSA);
-    fprintf(output_file,"RMS Phase B Voltage : %.8f V\n", RMSB);
-    fprintf(output_file,"RMS Phase C Voltage : %.8f V\n", RMSC);
-    fprintf(output_file,"Mean Phase A Voltage : %.8f V\n", meanA);
-    fprintf(output_file,"Mean Phase B Voltage : %.8f V\n", meanB);
-    fprintf(output_file,"Mean Phase C Voltage : %.8f V\n", meanC);
-    fclose(output_file);
+    fprintf(output_file,"RMS Phase A Voltage: %.8f V\n", result.RMSA);
+    fprintf(output_file,"RMS Phase B Voltage: %.8f V\n", result.RMSB);
+    fprintf(output_file,"RMS Phase C Voltage; %.8f V\n", result.RMSC);
+    fprintf(output_file,"Max Voltage for Phase A: %.8f V\n", result.max_freqA);
+    fprintf(output_file,"Min Voltage for Phase A: %.8f V\n", result.min_freqA);
+    fprintf(output_file,"Max Voltage for Phase B: %.8f V\n", result.max_freqB);
+    fprintf(output_file,"Min Voltage for Phase B: %.8f V\n", result.min_freqB);
+    fprintf(output_file,"Max Voltage for Phase C: %.8f V\n", result.max_freqC);
+    fprintf(output_file,"Min Voltage for Phase C: %.8f V\n", result.min_freqC);
+    fprintf(output_file,"Mean Phase A Voltage: %.8f V\n", result.meanA);
+    fprintf(output_file,"Mean Phase B Voltage: %.8f V\n", result.meanB);
+    fprintf(output_file,"Mean Phase C Voltage: %.8f V\n", result.meanC); //Appending the maths done to the txt file.
+    fclose(output_file); ///Closes file
 }
 double square_number(const double num) {
     const double val = num * num;
-    return val;
+    return val; //Custom function to square a number
 }

@@ -5,36 +5,22 @@
 
 extern void analysis(const WaveformSample* dataP,int count);
 
-int file_input(const char* file_name){
+int file_input(const char* file_name){ ///File is sent to here
     FILE *power_data = fopen(file_name, "r");
-    if (power_data == NULL){
-        printf("ERROR: Could not open file.\n");
+    if (power_data == NULL){ ///Checks for if the file is empty
         return 1;
     }
     printf("File opened successfully.\n");
-    int file_height = 0;
-    char line[1024];
-    while (fgets(line, sizeof(line), power_data) != NULL) {
+    int file_height = 0; ///How 'tall' (how many lines) are in the file
+    char line[4096];
+    while (fgets(line,sizeof(line),power_data) != NULL) {
         file_height=file_height+1;
     }
-    printf("Total lines counted: %d. \n", file_height);
-    if (file_height == 0) {
-        printf("Error: File is empty. \n");
-        fclose(power_data);
-        return 1;
-    }
-    rewind(power_data);
-    fgets(line, sizeof(line), power_data);
-    WaveformSample *dataP = malloc(file_height * sizeof(WaveformSample));
-    if (dataP == NULL) {
-        printf("Memory allocation failed. \n");
-        fclose(power_data);
-        return 1;
-    }
-    printf("Memory allocation successful. \n");
+    rewind(power_data); ///Returns back to the top of the CSV file
+    WaveformSample *dataP = malloc(file_height * sizeof(WaveformSample)); ///Storage with flexable allocation according to file 'height'
     int i = 0;
     int successful_reads = 0;
-    while (i < file_height && fgets(line, sizeof(line), power_data) != NULL){
+    while (i<file_height&&fgets(line,sizeof(line),power_data) != NULL){
         line[strcspn(line, "\n\r")] = 0;
         int fields = sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
                             &dataP[i].timestamp,
@@ -46,8 +32,9 @@ int file_input(const char* file_name){
                             &dataP[i].power_factor,
                             &dataP[i].trd_percent);
         if (fields == 8)successful_reads=successful_reads+1;
-        i=i+1;
+        i=i+1; ///Whole statement used to apply the data found in the CSV file to their respective arrays
     }
+    free(dataP);
     fclose(power_data);
     analysis(dataP,successful_reads);
     return 0;

@@ -2,10 +2,14 @@
 
 int file_input(const char* file_name);
 int analysis(float* result);
-
-int main(void)
-{
-    // You can change the path here if needed
-    const int result = file_input("C:\\Users\\theor\\OneDrive - UWE Bristol\\Attachments\\programing for eng\\tb2\\Project\\power_quality_log.csv");
+int main(int argc, char *argv[]){ //Allows for running through commandline
+    const char* filename = NULL;
+    if (argc > 1) {
+        filename = argv[1];
+        printf("Using file: %s\n", filename);
+    }else{
+        printf("No filename provided.\n");
+    }
+    const int result = file_input(filename);
     return result;
 }

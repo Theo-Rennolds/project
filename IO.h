@@ -12,5 +12,5 @@ typedef struct{
     double frequency;
     double power_factor;
     double trd_percent;
-}WaveformSample;
+}WaveformSample; //Creates the arrays for IO.c
 #endif //PROJECT_IO_H
