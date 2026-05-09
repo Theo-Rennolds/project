@@ -3,6 +3,8 @@
 #include <string.h>
 #include "IO.h"
 
+extern void analysis(const WaveformSample* dataP,int count);
+
 int file_input(const char* file_name){
     FILE *power_data = fopen(file_name, "r");
     if (power_data == NULL){
@@ -22,13 +24,34 @@ int file_input(const char* file_name){
         return 1;
     }
     rewind(power_data);
-    WaveformSample *data = malloc(file_height * sizeof(WaveformSample));
-    if (data == NULL) {
+    fgets(line, sizeof(line), power_data);
+    WaveformSample *dataP = malloc(file_height * sizeof(WaveformSample));
+    if (dataP == NULL) {
         printf("Memory allocation failed. \n");
         fclose(power_data);
         return 1;
     }
-    free(data);
+    printf("Memory allocation successful. \n");
+    int i = 0;
+    int successful_reads = 0;
+    while (i < file_height && fgets(line, sizeof(line), power_data) != NULL){
+        line[strcspn(line, "\n\r")] = 0;
+        int fields = sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
+                            &dataP[i].timestamp,
+                            &dataP[i].phase_A_voltage,
+                            &dataP[i].phase_B_voltage,
+                            &dataP[i].phase_C_voltage,
+                            &dataP[i].line_current,
+                            &dataP[i].frequency,
+                            &dataP[i].power_factor,
+                            &dataP[i].trd_percent);
+        if (fields == 8)successful_reads=successful_reads+1;
+        i=i+1;
+    }
+    for (int j = 0; j < successful_reads && j < 10; j++){
+        printf("Record %d: phase A voltage = %.4f\n", j+1, dataP[j].line_current);
+    }
+    printf("Successfully parsed %d records.\n", successful_reads);
     fclose(power_data);
     return 0;
 }
