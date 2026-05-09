@@ -1,6 +1,3 @@
-//
-// Created by t2-rennolds.
-//
 #ifndef PROJECT_IO_H
 #define PROJECT_IO_H
 typedef struct{

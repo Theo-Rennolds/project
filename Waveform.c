@@ -1,6 +1,3 @@
-//
-// Created by theor.
-//
 #include <stdio.h>
 #include <math.h>
 #include "IO.h"
@@ -8,7 +5,7 @@
 
 double square_number(double num);
 
-void analysis(const WaveformSample *data, const int count){
+void analysis(const WaveformSample *dataP, const int count){
     remove("results.txt"); //Clears any file that was used previously for new results
     FILE *output_file = fopen("results.txt","a"); //Creates and appends items to txt file
     if (output_file == NULL) {
@@ -17,38 +14,38 @@ void analysis(const WaveformSample *data, const int count){
     }
     AnalysisResults result = {0};
     for (int i=0;i<count;i=i+1){
-        result.sum_phase_A = result.sum_phase_A+data[i].phase_A_voltage;
-        result.sum_phase_B = result.sum_phase_B+data[i].phase_B_voltage;
-        result.sum_phase_C = result.sum_phase_C+data[i].phase_C_voltage; //The summation of A, B and C
-        result.sum_phase_ARMS = result.sum_phase_ARMS+square_number(data[i].phase_A_voltage);
-        result.sum_phase_BRMS = result.sum_phase_BRMS+square_number(data[i].phase_B_voltage);
-        result.sum_phase_CRMS = result.sum_phase_CRMS+square_number(data[i].phase_C_voltage); //The summation of the squares of A, B and C
-        if (fabs(data[i].phase_A_voltage) >= 324.9){
+        result.sum_phase_A = result.sum_phase_A+dataP[i].phase_A_voltage;
+        result.sum_phase_B = result.sum_phase_B+dataP[i].phase_B_voltage;
+        result.sum_phase_C = result.sum_phase_C+dataP[i].phase_C_voltage; //The summation of A, B and C
+        result.sum_phase_ARMS = result.sum_phase_ARMS+square_number(dataP[i].phase_A_voltage);
+        result.sum_phase_BRMS = result.sum_phase_BRMS+square_number(dataP[i].phase_B_voltage);
+        result.sum_phase_CRMS = result.sum_phase_CRMS+square_number(dataP[i].phase_C_voltage); //The summation of the squares of A, B and C
+        if (fabs(dataP[i].phase_A_voltage) >= 324.9){
             fprintf(output_file,"sample number %d in Phase A has been flagged for clipping.\n",i+1);
         }
-        if (fabs(data[i].phase_B_voltage) >= 324.9){
+        if (fabs(dataP[i].phase_B_voltage) >= 324.9){
             fprintf(output_file,"sample number %d in Phase B has been flagged for clipping.\n",i+1);
         }
-        if (fabs(data[i].phase_C_voltage) >= 324.9){
+        if (fabs(dataP[i].phase_C_voltage) >= 324.9){
             fprintf(output_file,"sample number %d in Phase C has been flagged for clipping.\n",i+1); //Flags sample numbers
         }
-        if (data[i].phase_A_voltage >= result.max_freqA) {
-            result.max_freqA = data[i].phase_A_voltage;
+        if (dataP[i].phase_A_voltage >= result.max_freqA) {
+            result.max_freqA = dataP[i].phase_A_voltage;
         }
-        if (data[i].phase_B_voltage >= result.max_freqB) {
-            result.max_freqB = data[i].phase_B_voltage;
+        if (dataP[i].phase_B_voltage >= result.max_freqB) {
+            result.max_freqB = dataP[i].phase_B_voltage;
         }
-        if (data[i].phase_C_voltage >= result.max_freqC) {
-            result.max_freqC = data[i].phase_C_voltage;
+        if (dataP[i].phase_C_voltage >= result.max_freqC) {
+            result.max_freqC = dataP[i].phase_C_voltage;
         }
-        if (data[i].phase_A_voltage <= result.min_freqA) {
-            result.min_freqA = data[i].phase_A_voltage;
+        if (dataP[i].phase_A_voltage <= result.min_freqA) {
+            result.min_freqA = dataP[i].phase_A_voltage;
         }
-        if (data[i].phase_B_voltage <= result.min_freqB) {
-            result.min_freqB = data[i].phase_B_voltage;
+        if (dataP[i].phase_B_voltage <= result.min_freqB) {
+            result.min_freqB = dataP[i].phase_B_voltage;
         }
-        if (data[i].phase_C_voltage <= result.min_freqC) {
-            result.min_freqC = data[i].phase_C_voltage; //The logistics for Min/Max A, B and C
+        if (dataP[i].phase_C_voltage <= result.min_freqC) {
+            result.min_freqC = dataP[i].phase_C_voltage; //The logistics for Min/Max A, B and C
         }
     }
     result.RMSA = sqrt(result.sum_phase_ARMS / count);
