@@ -48,10 +48,7 @@ int file_input(const char* file_name){
         if (fields == 8)successful_reads=successful_reads+1;
         i=i+1;
     }
-    for (int j = 0; j < successful_reads && j < 10; j++){
-        printf("Record %d: phase A voltage = %.4f\n", j+1, dataP[j].line_current);
-    }
-    printf("Successfully parsed %d records.\n", successful_reads);
     fclose(power_data);
+    analysis(dataP,successful_reads);
     return 0;
 }
